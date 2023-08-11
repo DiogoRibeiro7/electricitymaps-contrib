@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+
 """
-Create an aggregation zone config file by looking up sub zones based on the zone name.
-Sums capacities, all contributors.
-poetry run python scripts/create_aggregated_zone_config US US-Central
+Create an aggregation zone config file by looking up sub zones based on the
+zone name. Sums capacities, all contributors.
+
+Example usage:
+    poetry run python scripts/create_aggregated_zone_config US US-Central
 """
+
 import argparse
 from copy import deepcopy
 from pathlib import Path
@@ -64,7 +68,8 @@ def create_aggregated_config(zoneKey: str, timezone: str):
         "battery_storage"
     )
     for key, value in zoneDict["capacity"].items():
-        zoneDict["capacity"][key] = round(value, 1)
+        if value is not None:
+            zoneDict["capacity"][key] = round(value, 1)
 
     with open(f"config/zones/{zoneKey}.yaml", "w") as file:
         yaml.safe_dump(zoneDict, file)

@@ -8,6 +8,8 @@ from typing import Dict, List, Optional
 import arrow
 from requests import Session
 
+from parsers.lib.exceptions import ParserException
+
 # Useful links.
 # https://en.wikipedia.org/wiki/Electricity_sector_in_Argentina
 # https://en.wikipedia.org/wiki/List_of_power_stations_in_Argentina
@@ -18,7 +20,51 @@ from requests import Session
 CAMMESA_DEMANDA_ENDPOINT = (
     "https://api.cammesa.com/demanda-svc/generacion/ObtieneGeneracioEnergiaPorRegion/"
 )
+CAMMESA_EXCHANGE_ENDPOINT = (
+    "https://api.cammesa.com/demanda-svc/demanda/IntercambioCorredoresGeo/"
+)
 CAMMESA_RENEWABLES_ENDPOINT = "https://cdsrenovables.cammesa.com/exhisto/RenovablesService/GetChartTotalTRDataSource/"
+
+SUPPORTED_EXCHANGES = {
+    "AR->CL-SEN": "ARG-CHI",
+    "AR->PY": "ARG-PAR",
+    "AR->UY": "ARG-URU",
+    "AR-NEA->BR-S": "ARG-BRA",
+    "AR-BAS->AR-COM": "PBA-COM",
+    "AR-CEN->AR-COM": "CEN-COM",
+    "AR-CEN->AR-NOA": "CEN-NOA",
+    "AR-CUY->AR-COM": "CUY-COM",
+    "AR-CEN->AR-CUY": "CEN-CUY",
+    "AR-LIT->AR-NEA": "LIT-NEA",
+    "AR-BAS->AR-LIT": "PBA-LIT",
+    "AR-CUY->AR-NOA": "CUY-NOA",
+    "AR-LIT->AR-CEN": "LIT-CEN",
+    "AR-LIT->AR-NOA": "LIT-NOA",
+    "AR-BAS->AR-CEN": "PBA-CEN",
+    "AR-COM->AR-PAT": "COM-PAT",
+    "AR-NEA->AR-NOA": "NEA-NOA",
+}
+
+# Expected arrow direction if flow is first -> second
+EXCHANGE_DIRECTIONS = {
+    "AR->CL-SEN": 180,
+    "AR->PY": 45,
+    "AR->UY": 0,
+    "AR-NEA->BR-S": 45,
+    "AR-BAS->AR-COM": 225,
+    "AR-CEN->AR-COM": 270,
+    "AR-CEN->AR-NOA": 135,
+    "AR-CUY->AR-COM": 315,
+    "AR-CEN->AR-CUY": 225,
+    "AR-LIT->AR-NEA": 45,
+    "AR-BAS->AR-LIT": 90,
+    "AR-CUY->AR-NOA": 45,
+    "AR-LIT->AR-CEN": 225,
+    "AR-LIT->AR-NOA": 135,
+    "AR-BAS->AR-CEN": 135,
+    "AR-COM->AR-PAT": 270,
+    "AR-NEA->AR-NOA": 180,
+}
 
 
 def fetch_production(
@@ -79,7 +125,7 @@ def merged_production_mix(non_renewables_mix: dict, renewables_mix: dict) -> dic
 def renewables_production_mix(zone_key: str, session: Session) -> Dict[str, dict]:
     """Retrieves production mix for renewables using CAMMESA's API"""
 
-    today = arrow.now(tz="America/Argentina/Buenos Aires").format("DD-MM-YYYY")
+    today = arrow.now(tz="America/Argentina/Buenos_Aires").format("DD-MM-YYYY")
     params = {"desde": today, "hasta": today}
     renewables_response = session.get(CAMMESA_RENEWABLES_ENDPOINT, params=params)
     assert renewables_response.status_code == 200, (
@@ -143,8 +189,55 @@ def fetch_exchange(
     logger: Logger = getLogger(__name__),
 ) -> dict:
     """Requests the last known power exchange (in MW) between two zones."""
+    if target_datetime:
+        raise NotImplementedError("This parser is not yet able to parse past dates")
 
-    raise NotImplementedError("This exchange is not currently implemented")
+    sorted_zone_keys = sorted([zone_key1, zone_key2])
+    sorted_codes = "->".join(sorted_zone_keys)
+    flow: Optional[float] = None
+    returned_datetime: datetime
+
+    if sorted_codes in SUPPORTED_EXCHANGES:
+        current_session = session or Session()
+
+        api_cammesa_response = current_session.get(CAMMESA_EXCHANGE_ENDPOINT)
+        assert (
+            api_cammesa_response.status_code == 200
+        ), f"Exception when fetching exchange for {sorted_codes}: error when calling url={CAMMESA_EXCHANGE_ENDPOINT}"
+
+        exchange_name = SUPPORTED_EXCHANGES[sorted_codes]
+        exchange_list = api_cammesa_response.json()
+        for exchange in exchange_list["features"]:
+            properties = exchange["properties"]
+            if properties["nombre"] == exchange_name:
+                angle_config = EXCHANGE_DIRECTIONS[sorted_codes]
+                given_angle = int(properties["url"][6:])
+                flow = int(properties["text"])
+
+                # inverse flow if arrow doesn't match expected direction
+                if angle_config != given_angle:
+                    flow = -flow
+                returned_datetime = datetime.fromisoformat(
+                    properties["fecha"][:-2] + ":" + properties["fecha"][-2:]
+                )
+                break
+        if flow is None:
+            raise ParserException(
+                "AR.py",
+                f"Failed fetching exchange for {sorted_zone_keys}",
+                sorted_codes,
+            )
+    else:
+        raise NotImplementedError("This exchange is not currently implemented")
+
+    exchange = {
+        "sortedZoneKeys": sorted_codes,
+        "datetime": returned_datetime,
+        "netFlow": flow,
+        "source": "cammesaweb.cammesa.com",
+    }
+
+    return exchange
 
 
 def fetch_price(
@@ -163,11 +256,15 @@ if __name__ == "__main__":
 
     print("fetch_production() ->")
     print(fetch_production())
-    print("fetch_price() ->")
-    print(fetch_price())
     print("fetch_exchange(AR, PY) ->")
     print(fetch_exchange("AR", "PY"))
     print("fetch_exchange(AR, UY) ->")
     print(fetch_exchange("AR", "UY"))
     print("fetch_exchange(AR, CL-SEN) ->")
     print(fetch_exchange("AR", "CL-SEN"))
+    print("fetch_exchange(AR-CEN, AR-COM) ->")
+    print(fetch_exchange("AR-CEN", "AR-COM"))
+    print("fetch_exchange(AR-BAS, AR-LIT) ->")
+    print(fetch_exchange("AR-BAS", "AR-LIT"))
+    print("fetch_exchange(AR-COM, AR-PAT) ->")
+    print(fetch_exchange("AR-COM", "AR-PAT"))

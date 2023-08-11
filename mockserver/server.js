@@ -8,26 +8,40 @@ const PORT = process.argv[2] || 8001;
 
 app.use(cors());
 
-app.get('/v4/history', (req, res, next) => {
-  const { countryCode } = req.query;
-  if (countryCode && fs.existsSync(`./public/v4/history_${countryCode}`)) {
-    // we alter the URL to search for the specific history file if available
-    res.redirect(`/v4/history_${countryCode}`);
-  } else {
+const DEFAULT_ZONE_KEY = 'DE';
+
+app.get('/v6/details/:aggregate/:zoneId', (req, res, next) => {
+  const { aggregate, zoneId } = req.params;
+
+  // if file exists return it, otherwise redirect to DEFAULT file
+  if (fs.existsSync(`./public/v6/details/${aggregate}/${zoneId}.json`)) {
+    // file structure of project will return the correct file
     next();
+  } else {
+    res.redirect(`/v6/details/${aggregate}/${DEFAULT_ZONE_KEY}`);
   }
 });
 
-app.get('/v5/history/:aggregate', (req, res, next) => {
-  const { aggregate } = req.params;
-  const { countryCode } = req.query;
-  if (countryCode && fs.existsSync(`./public/v5/history/${countryCode}/${aggregate}.json`)) {
-    // we alter the URL to use the specific zone history file if available
-    res.redirect(`/v5/history/${countryCode}/${aggregate}`);
-  } else {
-    // otherwise fallback to general history files (that are using data from DE)
-    next();
-  }
+app.get('/v3/gfs/wind', (req, res, next) => {
+  const { refTime, targetTime } = req.query;
+
+  fs.readFile(`./public/v3/gfs/wind.json`, (err, data) => {
+    const jsonData = JSON.parse(data);
+    jsonData.data[0].header.refTime = targetTime;
+
+    res.json(jsonData);
+  });
+});
+
+app.get('/v3/gfs/solar', (req, res, next) => {
+  const { refTime, targetTime } = req.query;
+
+  fs.readFile(`./public/v3/gfs/solar.json`, (err, data) => {
+    const jsonData = JSON.parse(data);
+    jsonData.data.header.refTime = targetTime;
+
+    res.json(jsonData);
+  });
 });
 
 app.use(function (req, res, next) {

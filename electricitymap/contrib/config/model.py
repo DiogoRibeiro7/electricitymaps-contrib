@@ -18,9 +18,9 @@ from electricitymap.contrib.config import (
     EXCHANGES_CONFIG,
     ZONE_NEIGHBOURS,
     ZONES_CONFIG,
-    Point,
-    ZoneKey,
 )
+from electricitymap.contrib.config.types import Point
+from electricitymap.contrib.lib.types import ZoneKey
 
 # NOTE: we could cast Point to a NamedTuple with x/y accessors
 
@@ -69,7 +69,7 @@ class ParsersBaseModel(StrictBaseModel):
         """
         function_str = getattr(self, type)
         if function_str:
-            return import_string(f"electricitymap.contrib.parsers.{function_str}")
+            return import_string(f"parsers.{function_str}")
 
 
 class Parsers(ParsersBaseModel):
@@ -106,8 +106,8 @@ class Zone(StrictBaseModelWithAlias):
     contributors: Optional[List[str]]
     delays: Optional[Delays]
     disclaimer: Optional[str]
-    flag_file_name: Optional[str]
     parsers: Parsers = Parsers()
+    price_displayed: Optional[bool]
     sub_zone_names: Optional[List[ZoneKey]] = Field(None, alias="subZoneNames")
     timezone: Optional[str]
     key: ZoneKey  # This is not part of zones/{zone_key}.yaml, but added here to enable self referencing

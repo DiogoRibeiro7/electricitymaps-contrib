@@ -10,5 +10,7 @@ fallbackZoneMixes:
     value:
       gas: 0.923
       wind: 0.077
-  source: "electricityMap & Dra. Gabriela Mu\xF1oz Mel\xE9ndez"
-timezone: null
+  source: "Electricity Maps & Dra. Gabriela Mu\xF1oz Mel\xE9ndez"
+parsers:
+  consumption: MX.fetch_consumption
+timezone: America/Tijuana

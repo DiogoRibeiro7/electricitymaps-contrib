@@ -1,14 +1,18 @@
-.code-push.config
-node_modules
+.env.default
+*.keystore
+keystore.properties
 
-plugins
-platforms
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/metadata
+fastlane/test_output
+fastlane/fastlane-key.json
 
-www/electricitymap
-
-src
-ul_web_hooks/
-GoogleService-Info.plist
-google-services.json
-locales-config.json
-electricitymap.keystore
+# ios build files
+Electricity Maps.ipa
+*.cer
+*.certSigningRequest
+*.p12
+*.mobileprovision

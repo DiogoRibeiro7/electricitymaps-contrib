@@ -9,6 +9,7 @@ import pandas as pd
 from requests import Session
 
 from parsers.lib.config import refetch_frequency
+from parsers.lib.exceptions import ParserException
 
 
 @refetch_frequency(timedelta(days=1))
@@ -24,6 +25,11 @@ def fetch_production(
     url = "http://www.taipower.com.tw/d006/loadGraph/loadGraph/data/genary.txt"
     s = session or Session()
     response = s.get(url)
+    if not response.status_code == 200:
+        raise ParserException(
+            "TW",
+            f"Query failed with status code {response.status_code} and {response.content}",
+        )
     data = response.json()
 
     dumpDate = data[""]
@@ -53,6 +59,15 @@ def fetch_production(
     objData.loc[:, ["capacity", "output"]] = objData[["capacity", "output"]].apply(
         pd.to_numeric, errors="coerce"
     )
+
+    if objData["fueltype"].str.contains("Other Renewable Energy").any():
+        if objData["name"].str.contains("Geothermal").any():
+            objData.loc[
+                objData["name"].str.contains("Geothermal"), "fueltype"
+            ] = "Geothermal"
+        if objData["name"].str.contains("Biofuel").any():
+            objData.loc[objData["name"].str.contains("Biofuel"), "fueltype"] = "Biofuel"
+
     assert (
         not objData.capacity.isna().all()
     ), "capacity data is entirely NaN - input column order may have changed"
@@ -71,9 +86,11 @@ def fetch_production(
 
     # check output values coincide with total capacity by fuel type
     check_values = production.output <= production.capacity
-    assert check_values.loc[
-        ~check_values.index.isin(["Co-Gen"])
-    ].all(), "output > capacity"  # HACK: Co-Gen capacity is underestimated
+    modes_with_capacity_exceeded = production[~check_values].index.tolist()
+    for mode in modes_with_capacity_exceeded:
+        logger.warning(
+            f"Capacity exceeded for {mode} in {zone_key} at {dumpDate.datetime}"
+        )
 
     coal_capacity = (
         production.loc["Coal"].capacity + production.loc["IPP-Coal"].capacity
@@ -92,8 +109,10 @@ def fetch_production(
         "zoneKey": zone_key,
         "datetime": dumpDate.datetime,
         "production": {
+            "biomass": production.loc["Biofuel"].output,
             "coal": coal_production,
             "gas": gas_production,
+            "geothermal": production.loc["Geothermal"].output,
             "oil": oil_production,
             "hydro": production.loc["Hydro"].output,
             "nuclear": production.loc["Nuclear"].output,
@@ -102,8 +121,10 @@ def fetch_production(
             "unknown": production.loc["Co-Gen"].output,
         },
         "capacity": {
+            "biomass": production.loc["Biofuel"].capacity,
             "coal": coal_capacity,
             "gas": gas_capacity,
+            "geothermal": production.loc["Geothermal"].capacity,
             "oil": oil_capacity,
             "hydro": production.loc["Hydro"].capacity,
             "hydro storage": production.loc["Pumping Gen"].capacity,

@@ -1,16 +1,10 @@
-# Mobileapp
+# Electricity Maps Mobile Apps
+
+This is a capacitor project that builds the mobile apps from the web directory
 
 ## Prerequisites
 
-A lot of things here, so keep your tongue in your mouth and frequently use `cordova requirements` to verify changes. You might also have to restart your terminal in between steps.
-
-### iOS
-
-- install Xcode
-- `brew install cocoapods`
-
-### Android
-
+- Follow this guide: https://capacitorjs.com/docs/getting-started/environment-setup (but skip the Android SDK part)
 - install JDK v8 <-- to avoid having to create an Oracle account(!), you can find a `jdk-8u321-macosx-x64.dmg` in our internal Google Drive.
 - `brew install gradle`
 - install Android Studio - make sure you open it and go through the install wizard in the start
@@ -26,233 +20,103 @@ A lot of things here, so keep your tongue in your mouth and frequently use `cord
   export ANDROID_HOME=~/Library/Android/sdk
   ```
 
-See also the [guide in documentation](https://cordova.apache.org/docs/en/latest/guide/platforms/android/index.html#setting-environment-variables) for details and links.
+## Development
 
-### General
+If you have the web app installed and running and want to do production builds,the following commands will run everything you need.
 
-- Run `npm install -g cordova@10.0.0 code-push-cli@2.1.9`
-- Run `npm install`
-- Download `GoogleService-Info.plist` and `google-services.json` from Firebase and add them to this folder
+Navigate to mobileapp and run:
 
-If you want your local JavaScript changes to be reflected, you need to disable Codepush by commenting out the `codePush.sync` calls in `../web/src/cordova.js`.
+`pnpm build-ios`
+`pnpm build-android`
 
-To build the JavaScript:
+**Did the above not work?**
 
-```bash
-docker-compose build web && ./build.sh
-```
+<details>
 
-If you want to access the public API you will need a token:
+  <summary><b>Guide to manually run the same step</b></summary>
 
-```bash
-docker-compose build web --build-arg ELECTRICITYMAP_PUBLIC_TOKEN=... && ./build.sh
-```
+1. First make sure you have installed and built the web app.
 
-## Building & running apps
+   - Navigate to the **web** directory then:
+     - `pnpm install`
+     - `pnpm build`
 
-To add the app to cordova
+2. To enable hot reload you must runt the web app locally on port 5173: `pnpm dev`
 
-```bash
-cordova platform add {ios,android}
-```
+3. Navigate to the **mobileapp** directory and run `pnpm install`
 
-To build the cordova app:
+4. Add Android and iOS to Capacitor:
 
-```bash
-cordova build {ios,android}
-```
+   - `pnpm exec cap add android`
+   - `pnpm exec cap add ios`
 
-To run the app:
+5. Copy Assets to app directories: `pnpm exec cap copy`
 
-```bash
-cordova run {ios,android}
-```
+6. Sync the web project to capacitor: `pnpm exec cap sync`
 
-In case you want to use xcode:
+</details>
+
+### Run the app locally with hot reload
 
 ```bash
-open platforms/ios/electricityMap.xcworkspace
+pnpm dev-android
+pnpm dev-ios
 ```
 
-Note when building from XCode, one has to remember to run `cordova prepare ios` before each build. This will push the `www/` files into the iOS platform. Without this, the `www` files won't be updated.
-This is not required when using `cordova build` (it automatically runs `cordova prepare`).
+## Deployment
 
-## Releasing a new (code-push) build
+We use [fastlane](https://fastlane.tools/) to build and deploy the apps automatically.
+See [fastlane/README.md](./fastlane/README.md) for more information.
 
-To do a release build (android):
+### Setup
+
+1. `bundle install`
+2. Ensure you have the following keyfiles locally (ask the team internally to get them):
+   - `.env.default`
+   - `android/electricitymap.keystore`
+   - `android/keystore.properties`
+   - `fastlane/fastlane-key.json`
+3. Update keys in `.env.default`:
+   - Add your own Apple ID
+   - Open https://appleid.apple.com/account/manage and create an App-Specific Password to be used for the FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD environment variable
+   - Ask internally for the team ids
+
+### Making a beta build
+
+Makes a build and distributes it for internal testing.
 
 ```bash
-cordova build android --release -- --keystore=electricitymap.keystore --alias=electricitymapkey --storePassword XXX --password XXX
+pnpm run fast android beta
+pnpm run fast ios beta
 ```
 
-(ask internally for the password)
+### Publishing to the app stores
 
-To do a release build (ios):
+Once beta builds have been tested and approved, you can publish them to the app stores.
 
 ```bash
-cordova build ios --release
+pnpm run fast ios publish
+pnpm run fast android publish
 ```
 
-To push a new cordova release:
+---
 
-```bash
-# You need to first login and create an account at appcenter.ms - and perhaps also get invited to the organization
-code-push login
-
-code-push release-cordova electricitymap-{ios,android} {ios,android}
-code-push promote electricitymap-{ios,android} Staging Production
-```
-
-## Release a new app-store build
-
-Note about releases: bumping the release number will cause a new binary to be created. All code-push updates are tied to a binary version, meaning that apps will only update to code-push updates that are compatible with their binary version.
-
-To push a new store release:
-
-- Update the version in config.xml
-- Run `cordova prepare` if you're planning to build directly from XCode
-- Make release builds (previously explained)
-- iOS
-  - Make sure you have XCode installed and are signed in under preferences > accounts
-  - Go to [appstoreconnect.apple.com](https://appstoreconnect.apple.com) and create a new version (blue + icon in the left panel)
-  - Follow [this guide](https://jackmckew.dev/releasing-cordova-apps-on-google-play-app-store.html)
-  - Go into TestFlight and test on your own device
-  - Submit the new build for review when everything is looking good
-- Android
-  - Open folder `mobileapp/platforms/android/app/build/outputs/apk/release` and upload the `app-release.apk` file on [Play Store Console](https://play.google.com/console)
-- Celebrate!
-
-## App/Play Store Release Checklist
-
-- Run a debug build on iOS/Android and check that code-push properly installs an update.
-- Check app icons - if it's a robot (Cordova logo), look into `platforms/ios/electricityMap/Images.xcassets/AppIcon.appiconset` and ensure that there's only emap icons. Otherwise delete them and rerun build.sh
+If you need more information:
+https://capacitorjs.com/docs/getting-started
 
 ## Troubleshooting
 
-If you get
+<details>
+  <summary>Android emulator not working?</summary>
 
-```
-ld: warning: directory not found for option '-L/Users/oliviercorradi/Library/Developer/Xcode/DerivedData/electricityMap-bodzannsraziqncaeafoyayssnvd/Build/Products/Debug-iphonesimulator/GoogleToolboxForMac'
-ld: warning: directory not found for option '-L/Users/oliviercorradi/Library/Developer/Xcode/DerivedData/electricityMap-bodzannsraziqncaeafoyayssnvd/Build/Products/Debug-iphonesimulator/nanopb'
-ld: library not found for -lGoogleToolboxForMac
-```
+Android studio will need a virtual device, shown here in the Android Studio opening screen:
+![](./VDM.png)
 
-while building for ios, you should run `pod install` from the `platforms/ios` directory.
+If you get XCode error "Command PhaseScriptExecution failed with a nonzero exit code"
+Then in Pods-Electricity Maps-frameworks.sh
+Replace:
+`source="$(readlink "${source}")"`
+With:
+`source="$(readlink -f "${source}")"`
 
-If you get a blank screen on iOS, as https://github.com/Microsoft/cordova-plugin-code-push/issues/434 hardcodes the cordova-plugin-file version, you must:
-
-```bash
-cordova plugin rm cordova-plugin-file --force
-cordova plugin rm cordova-plugin-file-transfer --force
-cordova plugin add cordova-plugin-file@latest
-cordova plugin add cordova-plugin-file-transfer@latest
-```
-
-If the Android icons are not working, check the AndroidManifest.xml and double check that the key "@mipmap/ic_launcher" is correctly set (and not @mipmap/icon)
-
-If you get "No known instance method for selector 'userAgent' in CDVFileTransfer.m", then follow information from https://github.com/apache/cordova-plugin-file-transfer/issues/258#issuecomment-956233758
-
-If you get "env: node: No such file or directory", then it means you don't have node set up at /usr/local/bin/node (you might be using nvm).
-This will create a symlink from /usr/local/bin/node to your current node version:
-
-```bash
-ln -s $(eval which node) /usr/local/bin/node
-```
-
-### Cannot find module '../../src/plugman/platforms/ios'
-
-(From https://github.com/nordnet/cordova-universal-links-plugin/issues/131#issuecomment-387761895)
-
-In plugins\cordova-universal-links-plugin\hooks\lib\ios\xcodePreferences.js
-
-Change line 135-150:
-
-```javascript
-function loadProjectFile() {
-  var platform_ios;
-  var projectFile;
-
-  try {
-    // try pre-5.0 cordova structure
-    platform_ios = context.requireCordovaModule(
-      'cordova-lib/src/plugman/platforms'
-    )['ios'];
-    projectFile = platform_ios.parseProjectFile(iosPlatformPath());
-  } catch (e) {
-    // let's try cordova 5.0 structure
-    platform_ios = context.requireCordovaModule(
-      'cordova-lib/src/plugman/platforms/ios'
-    );
-    projectFile = platform_ios.parseProjectFile(iosPlatformPath());
-  }
-
-  return projectFile;
-}
-```
-
-To this:
-
-```javascript
-function loadProjectFile() {
-  var platform_ios;
-  var projectFile;
-  try {
-    // try pre-5.0 cordova structure
-    platform_ios = context.requireCordovaModule(
-      'cordova-lib/src/plugman/platforms'
-    )['ios'];
-    projectFile = platform_ios.parseProjectFile(iosPlatformPath());
-  } catch (e) {
-    try {
-      // let's try cordova 5.0 structure
-      platform_ios = context.requireCordovaModule(
-        'cordova-lib/src/plugman/platforms/ios'
-      );
-      projectFile = platform_ios.parse(iosPlatformPath());
-    } catch (e) {
-      // try cordova 7.0 structure
-      var iosPlatformApi = require(path.join(
-        iosPlatformPath(),
-        '/cordova/Api'
-      ));
-      var projectFileApi = require(path.join(
-        iosPlatformPath(),
-        '/cordova/lib/projectFile.js'
-      ));
-      var locations = new iosPlatformApi().locations;
-      projectFile = projectFileApi.parse(locations);
-    }
-  }
-  return projectFile;
-}
-```
-
-### Cannot read property 'manifest' of undefined
-
-(From https://stackoverflow.com/a/57638582/11940257)
-
-Go to file `plugins/cordova-universal-links-plugin/hooks/lib/android/manifestWriter.js` and change the following:
-
-```javascript
-var pathToManifest = path.join(
-  cordovaContext.opts.projectRoot,
-  'platforms',
-  'android',
-  'cordovaLib',
-  'AndroidManifest.xml'
-);
-```
-
-to
-
-```javascript
-var pathToManifest = path.join(
-  cordovaContext.opts.projectRoot,
-  'platforms',
-  'android',
-  'app',
-  'src',
-  'main',
-  'AndroidManifest.xml'
-);
-```
+</details>

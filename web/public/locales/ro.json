@@ -103,7 +103,7 @@
     "hideWindLayer": "Ascundeți vânt",
     "showSolarLayer": "Arătați soare",
     "hideSolarLayer": "Ascundeți soare",
-    "toggleDarkMode": "Activați modul întunecat",
+    "changeTheme": "Activați modul întunecat",
     "noParserInfo": "Date indisponibile",
     "temporaryDataOutage": "Date în timp real indisponibile",
     "production": "producție",
@@ -138,14 +138,14 @@
   "coal": "cărbune",
   "oil": "petrol",
   "unknown": "necunoscută",
-  "electricityComesFrom": "<b>%1$s %%</b> din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> provine din %3$s",
-  "emissionsComeFrom": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> provin din %3$s",
-  "electricityStoredUsing": "<b>%1$s %%</b> din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> este stocată folosind %3$s",
-  "emissionsStoredUsing": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> sunt stocate folosind %3$s",
-  "electricityExportedTo": "<b>%1$s %%</b> din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> este exportată în <img id=\"country-exchange-flag\"></img> <b>%3$s</b>",
-  "emissionsExportedTo": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> sunt exportate în <img id=\"country-exchange-flag\"></img> <b>%3$s</b>",
-  "electricityImportedFrom": "<b>%1$s %%</b> din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> este importată din <img id=\"country-exchange-flag\"></img> <b>%3$s</b>",
-  "emissionsImportedFrom": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în <img id=\"country-flag\"></img> <b>%2$s</b> sunt importate din <img id=\"country-exchange-flag\"></img> <b>%3$s</b>",
+  "electricityComesFrom": "<b>%1$s %%</b> din electricitatea disponibilă în %4$s <b>%2$s</b> provine din %3$s",
+  "emissionsComeFrom": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în %4$s <b>%2$s</b> provin din %3$s",
+  "electricityStoredUsing": "<b>%1$s %%</b> din electricitatea disponibilă în %4$s <b>%2$s</b> este stocată folosind %3$s",
+  "emissionsStoredUsing": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în %4$s <b>%2$s</b> sunt stocate folosind %3$s",
+  "electricityExportedTo": "<b>%1$s %%</b> din electricitatea disponibilă în %4$s <b>%2$s</b> este exportată în %5$s <b>%3$s</b>",
+  "emissionsExportedTo": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în %4$s <b>%2$s</b> sunt exportate în %5$s <b>%3$s</b>",
+  "electricityImportedFrom": "<b>%1$s %%</b> din electricitatea disponibilă în %4$s <b>%2$s</b> este importată din %5$s <b>%3$s</b>",
+  "emissionsImportedFrom": "<b>%1$s %%</b> din emisiile din electricitatea disponibilă în %4$s <b>%2$s</b> sunt importate din %5$s <b>%3$s</b>",
   "ofCO2eqPerMinute": "de CO₂echivalent pe minut",
   "theMap": {
     "groupName": "Harta",
@@ -208,7 +208,7 @@
     "feedback-question": "Pot oferi feedback?",
     "feedback-answer": "Te rugăm! Te rugăm să completezi <a href=\"https://forms.gle/VHaeHzXyGodFKZY18\" target=\"_blank\">formularul nostru de feedback </a> sau <a href=\"mailto:app@electricitymaps.com\">trimite-ne un email!</a>",
     "contribute-question": "Pot să contribui la proiect?",
-    "contribute-answer": "Da! Electricity Map e un proiect open-source, făcut posibil de voluntarii noștri. Dacă vrei să ajuți să dezvolți harta, fie prin surse noi de date, zone noi, componente noi sau bugfixes, nu ezitați să explorați pagina noastră de <a href=\"https://github.com/corradio/electricitymap/\" target=\"_blank\">github</a>.",
+    "contribute-answer": "Da! Electricity Map e un proiect open-source, făcut posibil de voluntarii noștri. Dacă vrei să ajuți să dezvolți harta, fie prin surse noi de date, zone noi, componente noi sau bugfixes, nu ezitați să explorați pagina noastră de <a href=\"https://github.com/electricitymaps/electricitymaps-contrib\" target=\"_blank\">github</a>.",
     "workTogether-question": "Putem lucra împreună?",
     "workTogether-answer": "Căutăm în mod activ noi oportunități de colaborare. <a href=\"mailto:app@electricitymaps.com\">Trimite-ne un email!</a>",
     "disclaimer-question": "Disclaimer",
@@ -251,47 +251,47 @@
     "AT": {
       "zoneName": "Austria"
     },
-    "AUS-NSW": {
+    "AU-NSW": {
       "countryName": "Australia",
       "zoneName": "New South Wales"
     },
-    "AUS-NT": {
+    "AU-NT": {
       "countryName": "Australia",
       "zoneName": "Northern Territory"
     },
-    "AUS-QLD": {
+    "AU-QLD": {
       "countryName": "Australia",
       "zoneName": "Queensland"
     },
-    "AUS-SA": {
+    "AU-SA": {
       "countryName": "Australia",
       "zoneName": "South Australia"
     },
-    "AUS-TAS": {
+    "AU-TAS": {
       "countryName": "Australia",
       "zoneName": "Tasmania"
     },
-    "AUS-TAS-CBI": {
+    "AU-TAS-CBI": {
       "countryName": "Australia",
       "zoneName": "Cape Barren Island"
     },
-    "AUS-TAS-KI": {
+    "AU-TAS-KI": {
       "countryName": "Australia",
       "zoneName": "King Island"
     },
-    "AUS-TAS-FI": {
+    "AU-TAS-FI": {
       "countryName": "Australia",
       "zoneName": "Flinders Island"
     },
-    "AUS-VIC": {
+    "AU-VIC": {
       "countryName": "Australia",
       "zoneName": "Victoria"
     },
-    "AUS-WA": {
+    "AU-WA": {
       "countryName": "Australia",
       "zoneName": "Western Australia"
     },
-    "AUS-WA-RI": {
+    "AU-WA-RI": {
       "countryName": "Australia",
       "zoneName": "Rottnest Island"
     },
@@ -342,6 +342,9 @@
     },
     "BQ": {
       "zoneName": "Bonaire, Sint Eustatius and Saba"
+    },
+    "BR": {
+      "zoneName": "Brazil"
     },
     "BR-CS": {
       "countryName": "Brazil",
@@ -637,10 +640,6 @@
     "GB-ORK": {
       "countryName": "Great Britain",
       "zoneName": "Orkney Islands"
-    },
-    "GB-SHI": {
-      "countryName": "Great Britain",
-      "zoneName": "Shetland Islands"
     },
     "GB-ZET": {
       "countryName": "Great Britain",
@@ -1540,10 +1539,6 @@
       "countryName": "United States of America",
       "zoneName": "Associated Electric Cooperative, Inc."
     },
-    "US-MIDW-GLHB": {
-      "countryName": "United States of America",
-      "zoneName": "GridLiance"
-    },
     "US-MIDW-LGEE": {
       "countryName": "United States of America",
       "zoneName": "Louisville Gas And Electric Company And Kentucky Utilities"
@@ -1559,10 +1554,6 @@
     "US-NW-AVA": {
       "countryName": "United States of America",
       "zoneName": "Avista Corporation"
-    },
-    "US-NW-AVRN": {
-      "countryName": "United States of America",
-      "zoneName": "Avangrid Renewables Cooperative"
     },
     "US-NW-BPAT": {
       "countryName": "United States of America",
@@ -1656,10 +1647,6 @@
       "countryName": "United States of America",
       "zoneName": "Arizona Public Service Company"
     },
-    "US-SW-DEAA": {
-      "countryName": "United States of America",
-      "zoneName": "Arlington Valley, LLC"
-    },
     "US-SW-EPE": {
       "countryName": "United States of America",
       "zoneName": "El Paso Electric Company"
@@ -1667,10 +1654,6 @@
     "US-SW-GRIF": {
       "countryName": "United States of America",
       "zoneName": "Griffith Energy, LLC"
-    },
-    "US-SW-HGMA": {
-      "countryName": "United States of America",
-      "zoneName": "New Harquahala Generating Company, LLC"
     },
     "US-SW-PNM": {
       "countryName": "United States of America",

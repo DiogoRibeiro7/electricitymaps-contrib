@@ -1,4 +1,4 @@
-VERSION 0.6
+VERSION 0.7
 FROM python:3.8
 WORKDIR /contrib
 
@@ -15,10 +15,10 @@ src-files:
 
 prepare:
   FROM +src-files
-  RUN pip install poetry==1.1.12
+  RUN pip install poetry==1.4.2
   RUN apt-get update && apt-get install -y python3-opencv tesseract-ocr tesseract-ocr-jpn tesseract-ocr-eng libgl1
   RUN poetry config virtualenvs.create false
-  RUN poetry install -E parsers -E validators
+  RUN poetry install --compile -E parsers -E validators
 
 build:
   FROM +prepare
@@ -26,6 +26,6 @@ build:
 test:
   FROM +build
   COPY tests ./tests
-  COPY web/src/helpers/constants.js ./web/src/helpers/constants.js # TODO: python tests should not depend on this js file
+  COPY web/src/utils/constants.ts ./web/src/utils/constants.ts # TODO: python tests should not depend on this js file
   COPY web/geo/world.geojson ./web/geo/world.geojson
   RUN poetry run check

@@ -21,5 +21,6 @@ fallbackZoneMixes:
       hydro: 0.88
       unknown: 0.01
       wind: 0.01
-flag_file_name: ca.png
-timezone: null
+parsers:
+  consumption: CA_BC.fetch_consumption
+timezone: America/Vancouver
